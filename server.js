@@ -5,7 +5,7 @@ import router from './routes/index.routes.js';
 const app = express();
 const port = 5000;
 
-app.use(cors()); // Adicione esta linha para habilitar CORS
+app.use(cors());
 app.use(express.json());
 app.use(router);
 
