@@ -5,6 +5,6 @@ import favoritesRoutes from './favorites.routes.js';
 const router = Router();
 
 router.use('/auth', authRoutes);
-router.use(favoritesRoutes); // Adicione esta linha
+router.use('/favorites', favoritesRoutes);
 
 export default router;

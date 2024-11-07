@@ -1,19 +1,16 @@
 import { Router } from 'express';
 
 const router = Router();
+const favorites = []; // Simulação de favoritos
 
-let favorites = [];
-
-router.post('/favorites', (req, res) => {
-  const { mangaId, userId } = req.body;
-  console.log('Dados recebidos no backend:', req.body); // Adicione esta linha para depuração
-  if (!mangaId || !userId) {
-    return res.status(400).send('Manga ID e User ID são obrigatórios');
+router.post('/', (req, res) => {
+  const { mangaId, userId, title } = req.body;
+  if (!mangaId || !userId || !title) {
+    return res.status(400).json({ error: 'ID do mangá, ID do usuário e título são obrigatórios' });
   }
-
-  const favorite = { mangaId, userId };
-  favorites.push(favorite);
-  res.status(201).send({ favorites });
+  const newFavorite = { mangaId, userId, title };
+  favorites.push(newFavorite);
+  res.status(200).json({ message: 'Manga adicionado aos favoritos', favorite: newFavorite });
 });
 
 export default router;
