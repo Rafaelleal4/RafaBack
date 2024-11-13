@@ -1,51 +1,93 @@
-import { Router } from 'express';
+import { Router } from "express";
 
 const router = Router();
 const users = [];
-const favorites = []; // Simulação de favoritos
+let loggedInUserID = null; // Variável para armazenar o ID do usuário logado
 
 // Rota para cadastro
-router.post('/register', (req, res) => {
+router.post("/register", (req, res) => {
   const { username, password } = req.body;
 
-  console.log('Recebido:', { username, password });
+  console.log("Recebido:", { username, password });
 
   if (!username || !password) {
-  return res.status(400).json({ message: 'Username e password são obrigatórios' });
-}
+    return res
+      .status(400)
+      .json({ message: "Username e password são obrigatórios" });
+  }
 
-const userExists = users.find(user => user.username === username);
-if (userExists) {
-  return res.status(400).json({ message: 'Usuário já existe' });
-}
+  const userExists = users.find((user) => user.username === username);
+  if (userExists) {
+    return res.status(400).json({ message: "Usuário já existe" });
+  }
 
-const newUser = { id: users.length + 1, username, password };
-users.push(newUser);
-res.json(newUser);
+  const newUser = { id: users.length + 1, username, password, favorites: [] };
+  users.push(newUser);
+  res.json(newUser);
 });
 
 // Rota para login
-router.post('/login', (req, res) => {
+router.post("/login", (req, res) => {
   const { username, password } = req.body;
 
-  const user = users.find(user => user.username === username && user.password === password);
+  const user = users.find(
+    (user) => user.username === username && user.password === password
+  );
   if (user) {
-    res.json({ message: 'Login bem-sucedido', data: user });
+    loggedInUserID = user.id; // Armazena o usuário logado
+    res.json({ message: "Login bem-sucedido", data: user });
   } else {
-    res.status(400).json({ message: 'Usuário ou senha incorretos' });
+    res.status(400).json({ message: "Usuário ou senha incorretos" });
   }
 });
 
-// Rota para obter dados do usuário
-router.get('/user', (req, res) => {
-  // Simulação de dados do usuário
-  const user = users[0]; // Supondo que o primeiro usuário seja o logado
-
-  if (!user) {
-    return res.status(404).json({ message: 'Usuário não encontrado' });
+// Rota para obter dados do usuário logado
+router.get("/user", (req, res) => {
+  if (!loggedInUserID) {
+    return res.status(401).json({ message: "Nenhum usuário logado" });
   }
 
-  res.status(200).json({ user, favorites });
+  const user = users.find((user) => user.id === loggedInUserID);
+  if (!user) {
+    return res.status(404).json({ message: "Usuário não encontrado" });
+  }
+
+  res.status(200).json({ user });
+});
+
+// Rota para obter todos os usuários
+router.get("/users", (req, res) => {
+  res.status(200).json({ users });
+});
+
+// Rota para adicionar um mangá aos favoritos do usuário logado
+router.post("/favorites", (req, res) => {
+  if (!loggedInUserID) {
+    return res.status(401).json({ message: "Nenhum usuário logado" });
+  }
+
+  const { mangaId } = req.body;
+  const user = users.find((user) => user.id === loggedInUserID); // Acessa o usuário logado
+
+  if (!user) {
+    return res.status(404).json({ message: "Usuário não encontrado" });
+  }
+
+  // Verifica se o mangá já está nos favoritos do usuário
+  const isFavorite = user.favorites.some((fav) => fav.mangaId === mangaId);
+  if (isFavorite) {
+    return res.status(400).json({ message: "Mangá já está nos favoritos" });
+  }
+
+  // Adiciona o mangá aos favoritos do usuário
+  const favorite = { mangaId };
+  user.favorites.push(favorite);
+
+  // Retorna a mensagem de sucesso e o mangá adicionado aos favoritos para o usuário
+  res.status(200).json({
+    message: `Mangá adicionado aos favoritos de ${user.username}`, // Usando username
+    favorite,
+  });
 });
 
 export default router;
