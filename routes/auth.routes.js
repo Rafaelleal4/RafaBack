@@ -90,4 +90,18 @@ router.post("/favorites", (req, res) => {
   });
 });
 
+// Rota para obter os favoritos do usuário logado
+router.get("/favorites", (req, res) => {
+  if (!loggedInUserID) {
+    return res.status(401).json({ message: "Nenhum usuário logado" });
+  }
+
+  const user = users.find((user) => user.id === loggedInUserID);
+  if (!user) {
+    return res.status(404).json({ message: "Usuário não encontrado" });
+  }
+
+  res.status(200).json({ favorites: user.favorites });
+});
+
 export default router;
