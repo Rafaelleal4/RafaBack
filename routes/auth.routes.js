@@ -63,6 +63,9 @@ router.get("/user", (req, res) => {
 
 // Rota para obter todos os usuários
 router.get("/users", (req, res) => {
+  if (users.length === 0) {
+    return res.status(404).json({ message: "Nenhum usuário registrado" });
+  }
   res.status(200).json({ users });
 });
 
