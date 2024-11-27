@@ -41,6 +41,12 @@ router.post("/login", (req, res) => {
   }
 });
 
+// Rota para logout
+router.post("/logout", (req, res) => {
+  loggedInUserID = null; // Reseta o ID do usuário logado
+  res.json({ message: "Logout bem-sucedido" });
+});
+
 // Rota para obter dados do usuário logado
 router.get("/user", (req, res) => {
   if (!loggedInUserID) {
@@ -102,6 +108,26 @@ router.get("/favorites", (req, res) => {
   }
 
   res.status(200).json({ favorites: user.favorites });
+});
+
+// Rota para remover um mangá dos favoritos do usuário logado
+router.delete("/favorites/:mangaId", (req, res) => {
+  if (!loggedInUserID) {
+    return res.status(401).json({ message: "Nenhum usuário logado" });
+  }
+
+  const { mangaId } = req.params;
+  const user = users.find((user) => user.id === loggedInUserID); // Acessa o usuário logado
+
+  if (!user) {
+    return res.status(404).json({ message: "Usuário não encontrado" });
+  }
+
+  // Remove o mangá dos favoritos do usuário
+  user.favorites = user.favorites.filter((fav) => fav.mangaId !== mangaId);
+
+  // Retorna a mensagem de sucesso
+  res.status(200).json({ message: "Mangá removido dos favoritos" });
 });
 
 export default router;
